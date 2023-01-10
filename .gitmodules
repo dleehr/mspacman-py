@@ -1,0 +1,3 @@
+[submodule "mspacman-snes"]
+	path = mspacman-snes
+	url = git@github.com:dleehr/mspacman-snes.git
