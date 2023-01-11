@@ -34,7 +34,8 @@ def load_data():
 
 def load_level_background():
     global CURRENT_BACKGROUND_SURFACE
-    CURRENT_BACKGROUND_SURFACE = level_to_surface(LEVELS.tile_dict[CURRENT_LEVEL], SCREEN_SIZE)
+    level = LEVELS.tile_dict[CURRENT_LEVEL]
+    CURRENT_BACKGROUND_SURFACE = level_to_surface(level)
 
 
 def read_inputs():
@@ -42,8 +43,7 @@ def read_inputs():
 
 
 def draw_game_board():
-    SCREEN.blit(CURRENT_BACKGROUND_SURFACE, (0, 0))
-    # CURRENT_BACKGROUND_SURFACE.blit(SCREEN, (0, 0))
+    SCREEN.blit(CURRENT_BACKGROUND_SURFACE, (0, 24))
 
 
 def draw_player():
@@ -60,7 +60,8 @@ load_level_background()
 # game loop
 while True:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.QUIT:
+            sys.exit()
 
     # fill the background wit black
     SCREEN.fill(COLOR_BLACK)

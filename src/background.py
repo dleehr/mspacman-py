@@ -1,6 +1,8 @@
 # this is for making a surface
 from pygame import Surface
 
+LEVEL_SIZE = (224, 248)
+
 # hard-coded palette for level 1
 PALETTE = {
     0: (0x00, 0x00, 0x00),
@@ -12,9 +14,9 @@ PALETTE = {
 
 
 # This is pixel-based and probably horribly inefficient
-def level_to_surface(level_tile_list, screen_size):
+def level_to_surface(level_tile_list):
     # level is a tile list
-    s = Surface(screen_size, )
+    s = Surface(LEVEL_SIZE)
     for row_offset, tile_row in enumerate(level_tile_list):
         for tile_y in range(8):
             for col_offset, tile in enumerate(tile_row):
