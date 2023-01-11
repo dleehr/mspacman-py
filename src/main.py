@@ -1,13 +1,16 @@
 import pygame
 import sys
 from levels import load_levels
+from background import level_to_surface
 
 SCREEN = None
 CLOCK = None
 LEVELS = None
 
+CURRENT_BACKGROUND_SURFACE = None
+
 SCREEN_SIZE = (224, 288)
-COLOR_BLACK = (0,0,0)
+COLOR_BLACK = (0, 0, 0)
 CLOCK_RATE = 60
 
 
@@ -29,13 +32,18 @@ def load_data():
     LEVELS = load_levels()
 
 
+def load_level_background():
+    global CURRENT_BACKGROUND_SURFACE
+    CURRENT_BACKGROUND_SURFACE = level_to_surface(LEVELS.tile_dict[CURRENT_LEVEL], SCREEN_SIZE)
+
+
 def read_inputs():
     pass
 
 
 def draw_game_board():
-    # pixel array?
-    pass
+    SCREEN.blit(CURRENT_BACKGROUND_SURFACE, (0, 0))
+    # CURRENT_BACKGROUND_SURFACE.blit(SCREEN, (0, 0))
 
 
 def draw_player():
@@ -45,13 +53,8 @@ def draw_player():
 
 init_screen()
 load_data()
-
-level_1_tile_list = LEVELS.tile_dict[1]
-for tile_row in level_1_tile_list:
-    for y in range(8):
-        for tile in tile_row:
-            print(tile.get_row(y), end="")
-        print()
+# load the background for the current level
+load_level_background()
 
 
 # game loop
@@ -71,5 +74,3 @@ while True:
     # This flips the buffer
     pygame.display.flip()
     CLOCK.tick(CLOCK_RATE)
-    
-
