@@ -1,6 +1,7 @@
 # this is for making a surface
 from pygame import Surface
 
+# hard-coded palette for level 1
 PALETTE = {
     0: (0x00, 0x00, 0x00),
     1: (0xfb, 0x00, 0x07),
@@ -10,6 +11,7 @@ PALETTE = {
 }
 
 
+# This is pixel-based and probably horribly inefficient
 def level_to_surface(level_tile_list, screen_size):
     # level is a tile list
     s = Surface(screen_size, )

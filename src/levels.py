@@ -72,7 +72,6 @@ def generate_tile(tile, wall_list):
     if piece > 1 << 10:
         raise Exception('Piece index too large: {}'.format(piece))
     for x in range(repeat):
-        print(piece, flips, ":")
         wall = wall_list[piece]
         tile = Tile(flips, wall)
         yield tile

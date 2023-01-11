@@ -68,7 +68,7 @@ while True:
     read_inputs()
     draw_game_board()
     draw_player()
-    
+
     # draw the player
 
     # This flips the buffer
