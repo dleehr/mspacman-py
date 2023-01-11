@@ -1,24 +1,14 @@
 from bitplanes import load, chunk8
-from map import pat, ROW_WIDTH
+from map import pat
 from pathlib import Path
 import re
 
-walls = Path(__file__).parent.parent / 'mspacman-snes' / 'walls.chr'
-tiles = Path(__file__).parent.parent / 'mspacman-snes' / 'level1.map'
-
-# These are the wall indices
-wall_rows = load(walls)
-wall_rows = [r for r in wall_rows if r]
-
-# generator to list
-walls = [w for w in chunk8(wall_rows)]
-print(len(walls))
-print('walls')
 
 class Wall(object):
     def __init__(self, index, rows):
         self.index = index
         self.rows = rows
+
 
 class Tile(object):
 
@@ -40,14 +30,37 @@ class Tile(object):
         return row
 
 
-wall_list = []
+class Levels(object):
 
-for i, w in enumerate(walls):
-    wall = Wall(i, w)
-    wall_list.append(wall)
+    def __init__(self, wall_list, tile_dict):
+        self.wall_list = wall_list
+        self.tile_dict = tile_dict
 
 
-def generate_tile(tile):
+def load_levels():
+    walls = Path(__file__).parent.parent / 'mspacman-snes' / 'walls.chr'
+    tiles = Path(__file__).parent.parent / 'mspacman-snes' / 'level1.map'
+
+    # These are the wall indices
+    wall_rows = load(walls)
+    wall_rows = [r for r in wall_rows if r]
+
+    # generator to list
+    walls = [w for w in chunk8(wall_rows)]
+
+    wall_list = []
+
+    for i, w in enumerate(walls):
+        wall = Wall(i, w)
+        wall_list.append(wall)
+
+    tile_list = generate_tile_list(tiles, wall_list)
+    tile_dict = {1: tile_list}
+    levels = Levels(wall_list, tile_dict)
+    return levels
+
+
+def generate_tile(tile, wall_list):
     vals = re.search(pat, tile)
     # Group 2 is the repeats
     # Group 3 is the tile
@@ -56,19 +69,16 @@ def generate_tile(tile):
     piece = int(vals.group(3), base=16)
     repeat = int(vals.group(2) or 1)
     flips = vals.group(4)
-    h_flip = 'H' in flips
-    v_flip = 'V' in flips
     if piece > 1 << 10:
         raise Exception('Piece index too large: {}'.format(piece))
-    wall = walls[piece]
     for x in range(repeat):
-        print(piece, flips, ":")        
+        print(piece, flips, ":")
         wall = wall_list[piece]
         tile = Tile(flips, wall)
         yield tile
-            
-        
-def generate_tile_list():
+
+
+def generate_tile_list(tiles, wall_list):
     tile_list = []
     # now load the tiles
     tiles_rows = load(tiles)
@@ -76,17 +86,7 @@ def generate_tile_list():
     for row in tiles_rows:
         tile_row = []
         for tile_code in row.split():
-            for t in generate_tile(tile_code):
+            for t in generate_tile(tile_code, wall_list):
                 tile_row.append(t)
         tile_list.append(tile_row)
     return tile_list
-        
-
-tile_list = generate_tile_list()
-for tile_row in tile_list:
-    for y in range(8):
-        for tile in tile_row:
-            print(tile.get_row(y), end="")
-        print()
-        
-    
