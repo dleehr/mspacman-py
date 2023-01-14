@@ -1,21 +1,23 @@
 import pygame
 import sys
 from levels import load_levels
-from background import level_to_surface
+from background import level_to_surface, PALETTE_1, LEVEL_SIZE
+from player import PLAYER_PALETTE, PLAYER_SIZE, load_player, player_to_surface
 
 SCREEN = None
 CLOCK = None
 LEVELS = None
 
 CURRENT_BACKGROUND_SURFACE = None
+CURRENT_PLAYER_SURFACE = None
 
 SCREEN_SIZE = (224, 288)
 COLOR_BLACK = (0, 0, 0)
 CLOCK_RATE = 60
 
-
+GAME_BOARD_POSITION = (0, 24)
 CURRENT_LEVEL = 1
-
+CURRENT_PLAYER_POSITION = (104, 156)
 
 pygame.init()
 
@@ -35,7 +37,13 @@ def load_data():
 def load_level_background():
     global CURRENT_BACKGROUND_SURFACE
     level = LEVELS.tile_dict[CURRENT_LEVEL]
-    CURRENT_BACKGROUND_SURFACE = level_to_surface(level)
+    CURRENT_BACKGROUND_SURFACE = level_to_surface(level, LEVEL_SIZE, PALETTE_1)
+
+
+def load_player_surface():
+    global CURRENT_PLAYER_SURFACE
+    player = load_player()
+    CURRENT_PLAYER_SURFACE = player_to_surface(player, PLAYER_SIZE, PLAYER_PALETTE)
 
 
 def read_inputs():
@@ -43,19 +51,19 @@ def read_inputs():
 
 
 def draw_game_board():
-    SCREEN.blit(CURRENT_BACKGROUND_SURFACE, (0, 24))
+    SCREEN.blit(CURRENT_BACKGROUND_SURFACE, GAME_BOARD_POSITION)
 
 
 def draw_player():
     # sprite
-    pass
+    SCREEN.blit(CURRENT_PLAYER_SURFACE, CURRENT_PLAYER_POSITION)
 
 
 init_screen()
 load_data()
 # load the background for the current level
 load_level_background()
-
+load_player_surface()
 
 # game loop
 while True:

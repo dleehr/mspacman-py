@@ -4,7 +4,7 @@ from pygame import Surface
 LEVEL_SIZE = (224, 248)
 
 # hard-coded palette for level 1
-PALETTE = {
+PALETTE_1 = {
     0: (0x00, 0x00, 0x00),
     1: (0xfb, 0x00, 0x07),
     2: (0xfd, 0xa9, 0x85),
@@ -14,9 +14,9 @@ PALETTE = {
 
 
 # This is pixel-based and probably horribly inefficient
-def level_to_surface(level_tile_list):
+def level_to_surface(level_tile_list, size, palette):
     # level is a tile list
-    s = Surface(LEVEL_SIZE)
+    s = Surface(size)
     for row_offset, tile_row in enumerate(level_tile_list):
         for tile_y in range(8):
             for col_offset, tile in enumerate(tile_row):
@@ -26,5 +26,5 @@ def level_to_surface(level_tile_list):
                     x = (col_offset * 8) + tile_x
                     y = (row_offset * 8) + tile_y
                     # now plot this
-                    s.set_at((x, y), PALETTE[int(palette_value_str)])
+                    s.set_at((x, y), palette[int(palette_value_str)])
     return s
