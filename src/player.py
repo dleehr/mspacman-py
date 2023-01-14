@@ -64,6 +64,7 @@ def load_player():
 
 def player_to_surface(player, size, palette):
     s = Surface(size)
+    s.set_colorkey(0)
     for y in range(size[1]):
         for x in range(size[0]):
             palette_value_str = player.get_at(x, y)
