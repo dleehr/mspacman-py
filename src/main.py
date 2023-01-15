@@ -1,7 +1,7 @@
 import pygame
 import sys
 from levels import load_levels
-from background import level_to_surface, PALETTE_1, LEVEL_SIZE
+from background import Background, PALETTES
 from player import PLAYER_PALETTE, PLAYER_SIZE, load_player, player_to_surface
 
 SCREEN = None
@@ -16,7 +16,8 @@ COLOR_BLACK = (0, 0, 0)
 CLOCK_RATE = 60
 
 GAME_BOARD_POSITION = (0, 24)
-CURRENT_LEVEL = 1
+CURRENT_LEVEL = 0
+BACKGROUNDS = {}
 CURRENT_PLAYER_POSITION = (104, 156)
 
 pygame.init()
@@ -36,8 +37,11 @@ def load_data():
 
 def load_level_background():
     global CURRENT_BACKGROUND_SURFACE
-    level = LEVELS.tile_dict[CURRENT_LEVEL]
-    CURRENT_BACKGROUND_SURFACE = level_to_surface(level, LEVEL_SIZE, PALETTE_1)
+    global BACKGROUNDS
+    level_tile_list = LEVELS.tile_dict[CURRENT_LEVEL]
+    background = Background(level_tile_list, PALETTES[CURRENT_LEVEL])
+    BACKGROUNDS[CURRENT_LEVEL] = background
+    CURRENT_BACKGROUND_SURFACE = background.get_surface()
 
 
 def load_player_surface():
@@ -76,9 +80,12 @@ while True:
 
     read_inputs()
     draw_game_board()
-    draw_player()
 
     # draw the player
+    draw_player()
+
+    # where is she?
+    BACKGROUNDS[CURRENT_LEVEL].tile_at(*CURRENT_PLAYER_POSITION).draw()
 
     # This flips the buffer
     pygame.display.flip()

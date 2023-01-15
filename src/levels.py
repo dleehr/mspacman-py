@@ -55,7 +55,8 @@ def load_levels():
         wall_list.append(wall)
 
     tile_list = generate_tile_list(tiles, wall_list)
-    tile_dict = {1: tile_list}
+    # This is a dict now but should probably just be a list
+    tile_dict = {0: tile_list}
     levels = Levels(wall_list, tile_dict)
     return levels
 
