@@ -13,15 +13,25 @@ CURRENT_PLAYER_SURFACE = None
 
 SCREEN_SIZE = (224, 288)
 COLOR_BLACK = (0, 0, 0)
-CLOCK_RATE = 60
+CLOCK_RATE = 20
 
 GAME_BOARD_POSITION = (0, 24)
 CURRENT_LEVEL = 0
 BACKGROUNDS = {}
 
+# Just some constants to make movement easier to write
+class Move:
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+    DOWN = (0, 1)
+    UP = (0, -1)
+    STOP = (0, 0)
+
+
 # this position is in game board pixel coordinates 
 CURRENT_PLAYER_POSITION = (104, 132)
-CURRENT_PLAYER_DIRECTION = (0, 0)
+CURRENT_PLAYER_DIRECTION = Move.STOP
+DESIRED_PLAYER_DIRECTION = Move.STOP
 
 pygame.init()
 
@@ -53,15 +63,7 @@ def load_player_surface():
     CURRENT_PLAYER_SURFACE = player_to_surface(player, PLAYER_SIZE, PLAYER_PALETTE)
 
 
-class Move:
-    LEFT = (-1, 0)
-    RIGHT = (1, 0)
-    DOWN = (0, 1)
-    UP = (0, -1)
-    STOP = (0, 0)
-
-
-# sets a new CURRENT_PLAYER_DIRECTION
+# sets a new DESIRED_PLAYER_DIRECTION
 def read_inputs():
     DirectionMap = {
         pygame.K_LEFT: Move.LEFT,
@@ -70,11 +72,11 @@ def read_inputs():
         pygame.K_DOWN: Move.DOWN,
         pygame.K_SPACE: Move.STOP,
     }
-    global CURRENT_PLAYER_DIRECTION
+    global DESIRED_PLAYER_DIRECTION
     for event in pygame.event.get(eventtype=pygame.KEYDOWN):
         # Just interested in the first keydown event
         if event.key in DirectionMap:
-            CURRENT_PLAYER_DIRECTION = DirectionMap[event.key]
+            DESIRED_PLAYER_DIRECTION = DirectionMap[event.key]
         break
 
 
@@ -94,9 +96,34 @@ def check_player_wall_collision():
     # 4. finally, divide by 8 to get the tile coordinate
     # But in the initial case it's still moving up/down a couple of pixels.
 
+    x_offset = 8
+    y_offset = 8
+    if True:
+        ypos = CURRENT_PLAYER_POSITION[1]
+        dpd = DESIRED_PLAYER_DIRECTION[1]
+        dpd_mult = 5
+        target_y = ypos + y_offset + (dpd * dpd_mult)
+        target_y_tile = int(target_y / 8)
+        print('ypos', ypos)
+        print('ypos + offset', ypos + y_offset)
+        print('dpd', dpd)
+        print('dpd * mult', dpd * dpd_mult)
+        print('target y', target_y)
+        print('target_y_tile', target_y_tile)
+        print()
+
+    # I see, the problem here was when movement stops. the direction vector goes
+    # went -1 to 0, so that 4 px offset to bump into the next square wasn't being included
+    # Updated to store DESIRED_PLAYER_DIRECTION and copy it into CURRENT_PLAYER_DIRECTION 
+    # if wokkable
+
+    # Getting closer on basic, initial movement with the 5, but the axis we're not moving here is still causing DPD to equal zero
+    # and throwing off the collision detection for turning.
+
+
     target_player_tile = (
-        int((CURRENT_PLAYER_POSITION[0] + 8 + (CURRENT_PLAYER_DIRECTION[0] * 4)) / 8),
-        int((CURRENT_PLAYER_POSITION[1] + 8 + (CURRENT_PLAYER_DIRECTION[1] * 4)) / 8),
+        int((CURRENT_PLAYER_POSITION[0] + x_offset + (DESIRED_PLAYER_DIRECTION[0] * 5)) / 8),
+        int((CURRENT_PLAYER_POSITION[1] + y_offset + (DESIRED_PLAYER_DIRECTION[1] * 5)) / 8),
     )
 
     current_background = BACKGROUNDS[CURRENT_LEVEL]
@@ -105,17 +132,24 @@ def check_player_wall_collision():
         target_player_tile[1]
         )
     # will that enter a movable background square?
-    if not tile.is_wokkable():
+    tile.draw()
+    
+    if tile.is_wokkable():
+        CURRENT_PLAYER_DIRECTION = DESIRED_PLAYER_DIRECTION
+        print("wokkable")
+    else:
         # if not, set CURRENT_PLAYER_DIRECTION to (0, 0)
-        CURRENT_PLAYER_DIRECTION = (0, 0)
-    # If so, do nothing
-
+        # But leave desired direction unchanged
+        CURRENT_PLAYER_DIRECTION = Move.STOP
+        print("not wokkable")
+   
 
 def update_player_position():
     global CURRENT_PLAYER_POSITION
     NEW_X = CURRENT_PLAYER_POSITION[0] + CURRENT_PLAYER_DIRECTION[0]
     NEW_Y = CURRENT_PLAYER_POSITION[1] + CURRENT_PLAYER_DIRECTION[1]
     CURRENT_PLAYER_POSITION = (NEW_X, NEW_Y)
+    print(CURRENT_PLAYER_POSITION)
 
 
 def draw_game_board():
@@ -144,6 +178,7 @@ load_player_surface()
 
 # game loop
 while True:
+    print('*' * 20)
     for event in pygame.event.get(eventtype=pygame.QUIT):
         sys.exit()
     # fill the background wit black
