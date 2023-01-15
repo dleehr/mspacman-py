@@ -19,6 +19,7 @@ GAME_BOARD_POSITION = (0, 24)
 CURRENT_LEVEL = 0
 BACKGROUNDS = {}
 CURRENT_PLAYER_POSITION = (104, 156)
+CURRENT_PLAYER_DIRECTION = (0, 0)
 
 pygame.init()
 
@@ -50,8 +51,28 @@ def load_player_surface():
     CURRENT_PLAYER_SURFACE = player_to_surface(player, PLAYER_SIZE, PLAYER_PALETTE)
 
 
+# sets a new CURRENT_PLAYER_DIRECTION
 def read_inputs():
-    pass
+    DirectionMap = {
+        pygame.K_LEFT: (-1, 0),
+        pygame.K_RIGHT: (1, 0),
+        pygame.K_UP: (0, -1),
+        pygame.K_DOWN: (0, 1),
+        pygame.K_SPACE: (0, 0),
+    }
+    global CURRENT_PLAYER_DIRECTION
+    for event in pygame.event.get(eventtype=pygame.KEYDOWN):
+        # Just interested in the first keydown event
+        if event.key in DirectionMap:
+            CURRENT_PLAYER_DIRECTION = DirectionMap[event.key]
+        break
+
+
+def update_player_position():
+    global CURRENT_PLAYER_POSITION
+    NEW_X = CURRENT_PLAYER_POSITION[0] + CURRENT_PLAYER_DIRECTION[0]
+    NEW_Y = CURRENT_PLAYER_POSITION[1] + CURRENT_PLAYER_DIRECTION[1]
+    CURRENT_PLAYER_POSITION = (NEW_X, NEW_Y)
 
 
 def draw_game_board():
@@ -71,22 +92,21 @@ load_player_surface()
 
 # game loop
 while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
-
+    for event in pygame.event.get(eventtype=pygame.QUIT):
+        sys.exit()
     # fill the background wit black
     SCREEN.fill(COLOR_BLACK)
 
     read_inputs()
-    draw_game_board()
+    update_player_position()
 
-    # draw the player
+    # now draw
+    draw_game_board()
     draw_player()
 
     # where is she?
-    BACKGROUNDS[CURRENT_LEVEL].tile_at(*CURRENT_PLAYER_POSITION).draw()
+    # BACKGROUNDS[CURRENT_LEVEL].tile_at(*CURRENT_PLAYER_POSITION).draw()
 
-    # This flips the buffer
+    # This draws - flip the buffer
     pygame.display.flip()
     CLOCK.tick(CLOCK_RATE)
