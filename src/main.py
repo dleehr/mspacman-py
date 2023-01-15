@@ -79,16 +79,19 @@ def read_inputs():
             DESIRED_PLAYER_DIRECTION = DirectionMap[event.key]
         break
 
+# So for momentum in the ASM code I do it a little differently
+# First, read the input and check wokkable on that
+# If joypad input tried to move into a wall, load last good player direction
+# and check wokkable again
 
-def check_player_wall_collision():
-    global CURRENT_PLAYER_DIRECTION
 
+def check_wokkable(position, direction):
     # If moving up or down, can't move if not aligned on an X tile
-    if DESIRED_PLAYER_DIRECTION[1] != 0 and CURRENT_PLAYER_POSITION[0] % 8 != 0:
+    if direction[1] != 0 and position[0] % 8 != 0:
         return
 
     # If moving left or right, can't move if not aligned on a Y tile
-    if DESIRED_PLAYER_DIRECTION[0] != 0 and CURRENT_PLAYER_POSITION[1] % 8 != 0:
+    if direction[0] != 0 and position[1] % 8 != 0:
         return
 
     # First, add 8. Let's explore the initial position (100, 128) for why
@@ -102,34 +105,37 @@ def check_player_wall_collision():
     # which is what we want to check when moving DOWN from the bottom of tile row 18
     # Do the same thing for X for the same reasons
 
-    target_player_x = CURRENT_PLAYER_POSITION[0] + DESIRED_PLAYER_DIRECTION[0] + 8
-    target_player_y = CURRENT_PLAYER_POSITION[1] + DESIRED_PLAYER_DIRECTION[1] + 8
+    target_x = position[0] + direction[0] + 8
+    target_y = position[1] + direction[1] + 8
 
-    if DESIRED_PLAYER_DIRECTION == Move.RIGHT:
-        target_player_x = target_player_x + 7
-    elif DESIRED_PLAYER_DIRECTION == Move.DOWN:
-        target_player_y = target_player_y + 7
+    if direction == Move.RIGHT:
+        target_x = target_x + 7
+    elif direction == Move.DOWN:
+        target_y = target_y + 7
 
-    target_player_tile = (
-        int(target_player_x / 8),
-        int(target_player_y / 8),
+    target_tile = (
+        int(target_x / 8),
+        int(target_y / 8),
     )
 
     current_background = BACKGROUNDS[CURRENT_LEVEL]
     tile = current_background.tile_at(
-        target_player_tile[0],
-        target_player_tile[1]
+        target_tile[0],
+        target_tile[1]
         )
-    # will that enter a movable background square?
-    # tile.draw()
-    
-    if tile.is_wokkable():
+
+    return tile.is_wokkable()
+
+
+def check_player_wall_collision():
+    global CURRENT_PLAYER_DIRECTION
+    if check_wokkable(CURRENT_PLAYER_POSITION, DESIRED_PLAYER_DIRECTION):
         CURRENT_PLAYER_DIRECTION = DESIRED_PLAYER_DIRECTION
+    elif check_wokkable(CURRENT_PLAYER_POSITION, CURRENT_PLAYER_DIRECTION):
+        CURRENT_PLAYER_DIRECTION = CURRENT_PLAYER_DIRECTION
     else:
-        # if not, set CURRENT_PLAYER_DIRECTION to (0, 0)
-        # But leave desired direction unchanged
         CURRENT_PLAYER_DIRECTION = Move.STOP
-   
+
 
 def update_player_position():
     global CURRENT_PLAYER_POSITION
