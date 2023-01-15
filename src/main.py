@@ -18,7 +18,9 @@ CLOCK_RATE = 60
 GAME_BOARD_POSITION = (0, 24)
 CURRENT_LEVEL = 0
 BACKGROUNDS = {}
-CURRENT_PLAYER_POSITION = (104, 156)
+
+# this position is in game board coordinates 
+CURRENT_PLAYER_POSITION = (104, 132)
 CURRENT_PLAYER_DIRECTION = (0, 0)
 
 pygame.init()
@@ -68,6 +70,23 @@ def read_inputs():
         break
 
 
+def check_player_wall_collision():
+    global CURRENT_PLAYER_DIRECTION
+    # Compute new player_position
+    new_x = CURRENT_PLAYER_POSITION[0] + CURRENT_PLAYER_DIRECTION[0]
+    new_y = CURRENT_PLAYER_POSITION[1] + CURRENT_PLAYER_DIRECTION[1]
+    # this is the top left corner of the thing right?
+    current_background = BACKGROUNDS[CURRENT_LEVEL]
+    # Should check based on the direction of movement.
+    # I did this in asm already, forgot about it.
+    tile = current_background.tile_at(new_x + 7, new_y + 7)
+    # will that enter a movable background square?
+    if not tile.is_wokkable():
+        # if not, set CURRENT_PLAYER_DIRECTION to (0, 0)
+        CURRENT_PLAYER_DIRECTION = (0, 0)
+    # If so, do nothing
+
+
 def update_player_position():
     global CURRENT_PLAYER_POSITION
     NEW_X = CURRENT_PLAYER_POSITION[0] + CURRENT_PLAYER_DIRECTION[0]
@@ -80,8 +99,17 @@ def draw_game_board():
 
 
 def draw_player():
-    # sprite
-    SCREEN.blit(CURRENT_PLAYER_SURFACE, CURRENT_PLAYER_POSITION)
+    # sprite-like thing. Not using pygame sprites so I can understand collision detection and 
+    # old, simple movement & drawing
+
+    # CURRENT_PLAYER_POSITION is in game-board coordinates
+    # if blit directly onto that, no need to offset but then I've got player smeared all over
+    # so blit with the offset
+    position = (
+        CURRENT_PLAYER_POSITION[0] + GAME_BOARD_POSITION[0], 
+        CURRENT_PLAYER_POSITION[1] + GAME_BOARD_POSITION[1],
+        )
+    SCREEN.blit(CURRENT_PLAYER_SURFACE, position)
 
 
 init_screen()
@@ -98,6 +126,8 @@ while True:
     SCREEN.fill(COLOR_BLACK)
 
     read_inputs()
+    # Check player wall collision
+    check_player_wall_collision()
     update_player_position()
 
     # now draw

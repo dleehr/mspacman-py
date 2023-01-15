@@ -29,6 +29,10 @@ class Tile(object):
             row = row[::-1]
         return row
 
+    def is_wokkable(self):
+        # Full-black, with dot, and with power pellet all true
+        return self.wall.index in [0, 1, 2]
+
 
 class Levels(object):
 
