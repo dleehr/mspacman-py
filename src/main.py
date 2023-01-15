@@ -13,7 +13,7 @@ CURRENT_PLAYER_SURFACE = None
 
 SCREEN_SIZE = (224, 288)
 COLOR_BLACK = (0, 0, 0)
-CLOCK_RATE = 20
+CLOCK_RATE = 60
 
 GAME_BOARD_POSITION = (0, 24)
 CURRENT_LEVEL = 0
@@ -28,8 +28,8 @@ class Move:
     STOP = (0, 0)
 
 
-# this position is in game board pixel coordinates 
-CURRENT_PLAYER_POSITION = (104, 132)
+# this position is in game board pixel coordinates, and the top left of the peg
+CURRENT_PLAYER_POSITION = (100, 128)
 CURRENT_PLAYER_DIRECTION = Move.STOP
 DESIRED_PLAYER_DIRECTION = Move.STOP
 
@@ -82,48 +82,26 @@ def read_inputs():
 
 def check_player_wall_collision():
     global CURRENT_PLAYER_DIRECTION
-    # Compute coordinates to check for collision
-    # In asm I check the direction of movement and look at the corners
-    # But here I was thinking I could just divide the coordinates down to the 28x31 matrix
-    # of background tiles and see where we landed.
-    # Mostly working but there's still a little bit of wiggle
-    # The thought here is
-    #
-    # 1. start at the player position (where the top left corner of the sprite is drawn)
-    # 2. Add 8 to each - it's a 16x16 sprite, so that brings us to the middle pixel location.
-    # 3. Then, move based on the direction. 4 px times the direction vector. That should be 
-    #   just enough to move our pixel coordinate into a new square if we're going to enter one
-    # 4. finally, divide by 8 to get the tile coordinate
-    # But in the initial case it's still moving up/down a couple of pixels.
 
-    x_offset = 8
-    y_offset = 8
-    if True:
-        ypos = CURRENT_PLAYER_POSITION[1]
-        dpd = DESIRED_PLAYER_DIRECTION[1]
-        dpd_mult = 5
-        target_y = ypos + y_offset + (dpd * dpd_mult)
-        target_y_tile = int(target_y / 8)
-        print('ypos', ypos)
-        print('ypos + offset', ypos + y_offset)
-        print('dpd', dpd)
-        print('dpd * mult', dpd * dpd_mult)
-        print('target y', target_y)
-        print('target_y_tile', target_y_tile)
-        print()
+    # If moving up or down, can't move if not aligned on an X tile
+    if DESIRED_PLAYER_DIRECTION[1] != 0 and CURRENT_PLAYER_POSITION[0] % 8 != 0:
+        return
 
-    # I see, the problem here was when movement stops. the direction vector goes
-    # went -1 to 0, so that 4 px offset to bump into the next square wasn't being included
-    # Updated to store DESIRED_PLAYER_DIRECTION and copy it into CURRENT_PLAYER_DIRECTION 
-    # if wokkable
+    # If moving left or right, can't move if not aligned on a Y tile
+    if DESIRED_PLAYER_DIRECTION[0] != 0 and CURRENT_PLAYER_POSITION[1] % 8 != 0:
+        return
 
-    # Getting closer on basic, initial movement with the 5, but the axis we're not moving here is still causing DPD to equal zero
-    # and throwing off the collision detection for turning.
+    target_player_x = CURRENT_PLAYER_POSITION[0] + DESIRED_PLAYER_DIRECTION[0] + 8
+    target_player_y = CURRENT_PLAYER_POSITION[1] + DESIRED_PLAYER_DIRECTION[1] + 8
 
+    if DESIRED_PLAYER_DIRECTION == Move.RIGHT:
+        target_player_x = target_player_x + 7
+    elif DESIRED_PLAYER_DIRECTION == Move.DOWN:
+        target_player_y = target_player_y + 7
 
     target_player_tile = (
-        int((CURRENT_PLAYER_POSITION[0] + x_offset + (DESIRED_PLAYER_DIRECTION[0] * 5)) / 8),
-        int((CURRENT_PLAYER_POSITION[1] + y_offset + (DESIRED_PLAYER_DIRECTION[1] * 5)) / 8),
+        int(target_player_x / 8),
+        int(target_player_y / 8),
     )
 
     current_background = BACKGROUNDS[CURRENT_LEVEL]
@@ -132,16 +110,14 @@ def check_player_wall_collision():
         target_player_tile[1]
         )
     # will that enter a movable background square?
-    tile.draw()
+    # tile.draw()
     
     if tile.is_wokkable():
         CURRENT_PLAYER_DIRECTION = DESIRED_PLAYER_DIRECTION
-        print("wokkable")
     else:
         # if not, set CURRENT_PLAYER_DIRECTION to (0, 0)
         # But leave desired direction unchanged
         CURRENT_PLAYER_DIRECTION = Move.STOP
-        print("not wokkable")
    
 
 def update_player_position():
@@ -149,7 +125,6 @@ def update_player_position():
     NEW_X = CURRENT_PLAYER_POSITION[0] + CURRENT_PLAYER_DIRECTION[0]
     NEW_Y = CURRENT_PLAYER_POSITION[1] + CURRENT_PLAYER_DIRECTION[1]
     CURRENT_PLAYER_POSITION = (NEW_X, NEW_Y)
-    print(CURRENT_PLAYER_POSITION)
 
 
 def draw_game_board():
@@ -163,9 +138,11 @@ def draw_player():
     # CURRENT_PLAYER_POSITION is in game-board coordinates
     # if blit directly onto that, no need to offset but then I've got player smeared all over
     # so blit with the offset
+
+    # add 4 more so my player position doesn't have to be the top left corner
     position = (
-        CURRENT_PLAYER_POSITION[0] + GAME_BOARD_POSITION[0], 
-        CURRENT_PLAYER_POSITION[1] + GAME_BOARD_POSITION[1],
+        CURRENT_PLAYER_POSITION[0] + GAME_BOARD_POSITION[0] + 4, 
+        CURRENT_PLAYER_POSITION[1] + GAME_BOARD_POSITION[1] + 4,
         )
     SCREEN.blit(CURRENT_PLAYER_SURFACE, position)
 
@@ -178,7 +155,6 @@ load_player_surface()
 
 # game loop
 while True:
-    print('*' * 20)
     for event in pygame.event.get(eventtype=pygame.QUIT):
         sys.exit()
     # fill the background wit black
