@@ -91,6 +91,17 @@ def check_player_wall_collision():
     if DESIRED_PLAYER_DIRECTION[0] != 0 and CURRENT_PLAYER_POSITION[1] % 8 != 0:
         return
 
+    # First, add 8. Let's explore the initial position (100, 128) for why
+    # That's the top left corner of the peg. Looking at the Y-coordinate, 128 is the
+    # last row of pixels in the tile at y-index 16. but the character is drawn on tile
+    # at y 17. So we add 8 to get to 136, putting us at the last row of tile row 17 for initial calculation.
+    #
+    # If we move UP, we subtract 1 to get 135. That's the last pixel in row in 16,
+    # which is what we want when moving UP from the top of tile row 17
+    # If we move DOWN, we add 1 to get 137, then add 7 to get 144. That's the first pixel in row 18
+    # which is what we want to check when moving DOWN from the bottom of tile row 18
+    # Do the same thing for X for the same reasons
+
     target_player_x = CURRENT_PLAYER_POSITION[0] + DESIRED_PLAYER_DIRECTION[0] + 8
     target_player_y = CURRENT_PLAYER_POSITION[1] + DESIRED_PLAYER_DIRECTION[1] + 8
 
