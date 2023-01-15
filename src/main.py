@@ -158,7 +158,7 @@ def draw_player():
 
     # add 4 more so my player position doesn't have to be the top left corner
     position = (
-        CURRENT_PLAYER_POSITION[0] + GAME_BOARD_POSITION[0] + 4, 
+        CURRENT_PLAYER_POSITION[0] + GAME_BOARD_POSITION[0] + 4,
         CURRENT_PLAYER_POSITION[1] + GAME_BOARD_POSITION[1] + 4,
         )
     SCREEN.blit(CURRENT_PLAYER_SURFACE, position)
