@@ -19,7 +19,7 @@ GAME_BOARD_POSITION = (0, 24)
 CURRENT_LEVEL = 0
 BACKGROUNDS = {}
 
-# this position is in game board coordinates 
+# this position is in game board pixel coordinates 
 CURRENT_PLAYER_POSITION = (104, 132)
 CURRENT_PLAYER_DIRECTION = (0, 0)
 
@@ -53,14 +53,22 @@ def load_player_surface():
     CURRENT_PLAYER_SURFACE = player_to_surface(player, PLAYER_SIZE, PLAYER_PALETTE)
 
 
+class Move:
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+    DOWN = (0, 1)
+    UP = (0, -1)
+    STOP = (0, 0)
+
+
 # sets a new CURRENT_PLAYER_DIRECTION
 def read_inputs():
     DirectionMap = {
-        pygame.K_LEFT: (-1, 0),
-        pygame.K_RIGHT: (1, 0),
-        pygame.K_UP: (0, -1),
-        pygame.K_DOWN: (0, 1),
-        pygame.K_SPACE: (0, 0),
+        pygame.K_LEFT: Move.LEFT,
+        pygame.K_RIGHT: Move.RIGHT,
+        pygame.K_UP: Move.UP,
+        pygame.K_DOWN: Move.DOWN,
+        pygame.K_SPACE: Move.STOP,
     }
     global CURRENT_PLAYER_DIRECTION
     for event in pygame.event.get(eventtype=pygame.KEYDOWN):
@@ -72,14 +80,30 @@ def read_inputs():
 
 def check_player_wall_collision():
     global CURRENT_PLAYER_DIRECTION
-    # Compute new player_position
-    new_x = CURRENT_PLAYER_POSITION[0] + CURRENT_PLAYER_DIRECTION[0]
-    new_y = CURRENT_PLAYER_POSITION[1] + CURRENT_PLAYER_DIRECTION[1]
-    # this is the top left corner of the thing right?
+    # Compute coordinates to check for collision
+    # In asm I check the direction of movement and look at the corners
+    # But here I was thinking I could just divide the coordinates down to the 28x31 matrix
+    # of background tiles and see where we landed.
+    # Mostly working but there's still a little bit of wiggle
+    # The thought here is
+    #
+    # 1. start at the player position (where the top left corner of the sprite is drawn)
+    # 2. Add 8 to each - it's a 16x16 sprite, so that brings us to the middle pixel location.
+    # 3. Then, move based on the direction. 4 px times the direction vector. That should be 
+    #   just enough to move our pixel coordinate into a new square if we're going to enter one
+    # 4. finally, divide by 8 to get the tile coordinate
+    # But in the initial case it's still moving up/down a couple of pixels.
+
+    target_player_tile = (
+        int((CURRENT_PLAYER_POSITION[0] + 8 + (CURRENT_PLAYER_DIRECTION[0] * 4)) / 8),
+        int((CURRENT_PLAYER_POSITION[1] + 8 + (CURRENT_PLAYER_DIRECTION[1] * 4)) / 8),
+    )
+
     current_background = BACKGROUNDS[CURRENT_LEVEL]
-    # Should check based on the direction of movement.
-    # I did this in asm already, forgot about it.
-    tile = current_background.tile_at(new_x + 7, new_y + 7)
+    tile = current_background.tile_at(
+        target_player_tile[0],
+        target_player_tile[1]
+        )
     # will that enter a movable background square?
     if not tile.is_wokkable():
         # if not, set CURRENT_PLAYER_DIRECTION to (0, 0)

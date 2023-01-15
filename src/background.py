@@ -36,9 +36,7 @@ class Background():
                         s.set_at((x, y), self.palette[int(palette_value_str)])
         return s
 
-    # get the wall at the pixel coordinate
+    # get the tile at the location (not pixel coordinates)
     def tile_at(self, x, y):
-        tile_x = int(x / 8)
-        tile_y = int(y / 8)
         # This is a 2D list
-        return self.level_tile_list[tile_y][tile_x]
+        return self.level_tile_list[y][x]
