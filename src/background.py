@@ -4,15 +4,6 @@ from pygame import Surface
 LEVEL_SIZE = (224, 248)
 COLS_PER_ROW = LEVEL_SIZE[0] / 8
 
-# hard-coded palette for level 1
-PALETTES = [{
-    0: (0x00, 0x00, 0x00),
-    1: (0xfb, 0x00, 0x07),
-    2: (0xfd, 0xa9, 0x85),
-    3: (0xd6, 0xd6, 0xd6),
-    4: (0xff, 0xff, 0xff),
-}]
-
 
 # encapsulates the surface and its backing walls/tiles
 class Background():
@@ -36,7 +27,7 @@ class Background():
                 x = (tile_x * 8) + local_x
                 y = (tile_y * 8) + local_y
                 self.surface.set_at((x, y), self.palette[int(palette_value_str)])
-                
+
     # get the tile at the location (not pixel coordinates)
     def tile_at(self, x, y):
         # This is a 2D list

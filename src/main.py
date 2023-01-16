@@ -1,7 +1,7 @@
 import pygame
 import sys
 from levels import load_levels
-from background import Background, PALETTES
+from background import Background
 from player import PLAYER_PALETTE, PLAYER_SIZE, load_player, player_to_surface
 
 SCREEN = None
@@ -53,7 +53,7 @@ def load_level_background():
     global CURRENT_BACKGROUND_SURFACE
     global BACKGROUNDS
     level_tile_list = LEVELS.tile_dict[CURRENT_LEVEL]
-    background = Background(level_tile_list, PALETTES[CURRENT_LEVEL])
+    background = Background(level_tile_list, LEVELS.palettes_dict[CURRENT_LEVEL])
     BACKGROUNDS[CURRENT_LEVEL] = background
     background.draw_full_surface()
     CURRENT_BACKGROUND_SURFACE = background.surface
@@ -136,7 +136,7 @@ def check_player_wall_collision():
     global CURRENT_PLAYER_DIRECTION
     global CURRENT_PLAYER_TILE_POSITION
     tile_position = get_tile_position(CURRENT_PLAYER_POSITION, DESIRED_PLAYER_DIRECTION)
-    if not tile_position: 
+    if not tile_position:
         return
     tile = get_current_background_tile(tile_position[0], tile_position[1])
     # return tile might be None
@@ -164,7 +164,7 @@ def check_player_eat_dot():
         tile.clear_wall()
         # now reload the background there
         BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(
-            CURRENT_PLAYER_TILE_POSITION[0], 
+            CURRENT_PLAYER_TILE_POSITION[0],
             CURRENT_PLAYER_TILE_POSITION[1]
             )
 
@@ -183,7 +183,7 @@ def draw_game_board():
 
 
 def draw_player():
-    # sprite-like thing. Not using pygame sprites so I can understand collision detection and 
+    # sprite-like thing. Not using pygame sprites so I can understand collision detection and
     # old, simple movement & drawing
 
     # CURRENT_PLAYER_POSITION is in game-board coordinates

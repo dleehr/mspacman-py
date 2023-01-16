@@ -6,6 +6,17 @@ import re
 DOT_POINTS = 10
 PP_POINTS = 50
 
+
+def load_palette(filename):
+    rows = load(filename)
+    palette = {}
+    for i, row in enumerate(rows):
+      # parse text and convert to hex
+      components = [int(x, base=16) for x in re.findall('..', row) ]
+      palette[i] = components
+    return palette
+
+
 class Wall(object):
     def __init__(self, index, rows):
         self.index = index
@@ -58,14 +69,16 @@ class Tile(object):
 
 class Levels(object):
 
-    def __init__(self, wall_list, tile_dict):
+    def __init__(self, wall_list, tile_dict, palettes_dict):
         self.wall_list = wall_list
         self.tile_dict = tile_dict
+        self.palettes_dict = palettes_dict
 
 
 def load_levels():
     walls = Path(__file__).parent.parent / 'mspacman-snes' / 'walls.chr'
     tiles = Path(__file__).parent.parent / 'mspacman-snes' / 'level1.map'
+    palette = Path(__file__).parent.parent / 'mspacman-snes' / 'level1.pxt'
 
     # These are the wall indices
     wall_rows = load(walls)
@@ -83,7 +96,8 @@ def load_levels():
     tile_list = generate_tile_list(tiles, wall_list)
     # This is a dict now but should probably just be a list
     tile_dict = {0: tile_list}
-    levels = Levels(wall_list, tile_dict)
+    palettes_dict = {0: load_palette(palette)}
+    levels = Levels(wall_list, tile_dict, palettes_dict)
     return levels
 
 
