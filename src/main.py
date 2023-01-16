@@ -2,7 +2,7 @@ import pygame
 import sys
 from levels import load_levels
 from background import Background
-from player import PLAYER_PALETTE, PLAYER_SIZE, load_player, player_to_surface
+from player import PLAYER_SIZE, load_player, player_to_surface
 
 SCREEN = None
 CLOCK = None
@@ -62,7 +62,7 @@ def load_level_background():
 def load_player_surface():
     global CURRENT_PLAYER_SURFACE
     player = load_player()
-    CURRENT_PLAYER_SURFACE = player_to_surface(player, PLAYER_SIZE, PLAYER_PALETTE)
+    CURRENT_PLAYER_SURFACE = player_to_surface(player, PLAYER_SIZE)
 
 
 # sets a new DESIRED_PLAYER_DIRECTION
