@@ -30,8 +30,7 @@ class Move:
 
 # this position is in game board pixel coordinates, and the top left of the peg
 CURRENT_PLAYER_POSITION = (100, 128)
-CURRENT_PLAYER_TILE = None # Keep the tile object around, but we could also just keep the coordinates and look it up
-CURRENT_PLAYER_TILE_POSITION = None
+CURRENT_PLAYER_TILE_POSITION = None # Keep the 28x36 coordinate of the tile the player is on or moving to for collision detection
 CURRENT_PLAYER_DIRECTION = Move.STOP
 DESIRED_PLAYER_DIRECTION = Move.STOP
 
@@ -88,14 +87,19 @@ def read_inputs():
 # and check wokkable again
 
 
-def get_tile(position, direction):
+def get_current_background_tile(x, y):
+    current_background = BACKGROUNDS[CURRENT_LEVEL]
+    return current_background.tile_at(x, y)
+
+
+def get_tile_position(position, direction):
     # If moving up or down, can't move if not aligned on an X tile
     if direction[1] != 0 and position[0] % 8 != 0:
-        return None, None
+        return None
 
     # If moving left or right, can't move if not aligned on a Y tile
     if direction[0] != 0 and position[1] % 8 != 0:
-        return None, None
+        return None
 
     # First, add 8. Let's explore the initial position (100, 128) for why
     # That's the top left corner of the peg. Looking at the Y-coordinate, 128 is the
@@ -121,48 +125,48 @@ def get_tile(position, direction):
         int(target_y / 8),
     )
 
-    current_background = BACKGROUNDS[CURRENT_LEVEL]
-    tile = current_background.tile_at(
-        target_tile[0],
-        target_tile[1]
-        )
-
-    return tile, target_tile
+    return target_tile
 
 
 # This checks the desired direction and current direction against
 # the map to see if they can move where they're trying to
-# It updates CURRENT_PLAYER_DIRECTION and CURRENT_PLAYER_TILE if
+# It updates CURRENT_PLAYER_DIRECTION and CURRENT_PLAYER_TILE_POSITION if
 # the target tile is wokkable
 def check_player_wall_collision():
     global CURRENT_PLAYER_DIRECTION
-    global CURRENT_PLAYER_TILE
     global CURRENT_PLAYER_TILE_POSITION
-    tile, tile_position = get_tile(CURRENT_PLAYER_POSITION, DESIRED_PLAYER_DIRECTION)
+    tile_position = get_tile_position(CURRENT_PLAYER_POSITION, DESIRED_PLAYER_DIRECTION)
+    if not tile_position: 
+        return
+    tile = get_current_background_tile(tile_position[0], tile_position[1])
     # return tile might be None
-    if tile and tile.is_wokkable():
+    if tile.is_wokkable():
         CURRENT_PLAYER_DIRECTION = DESIRED_PLAYER_DIRECTION
-        CURRENT_PLAYER_TILE = tile
         CURRENT_PLAYER_TILE_POSITION = tile_position
         return
-    tile, tile_position = get_tile(CURRENT_PLAYER_POSITION, CURRENT_PLAYER_DIRECTION)
-    if tile and tile.is_wokkable():
+    tile_position = get_tile_position(CURRENT_PLAYER_POSITION, CURRENT_PLAYER_DIRECTION)
+    if not tile_position:
+        return
+    tile = get_current_background_tile(tile_position[0], tile_position[1])
+    if tile.is_wokkable():
         CURRENT_PLAYER_DIRECTION = CURRENT_PLAYER_DIRECTION
-        CURRENT_PLAYER_TILE = tile
         CURRENT_PLAYER_TILE_POSITION = tile_position
         return
     CURRENT_PLAYER_DIRECTION = Move.STOP
 
 
-
 def check_player_eat_dot():
     # look at current tile
-    if CURRENT_PLAYER_TILE.is_edible():
-        points = CURRENT_PLAYER_TILE.get_points()
+    tile = get_current_background_tile(CURRENT_PLAYER_TILE_POSITION[0], CURRENT_PLAYER_TILE_POSITION[1])
+    if tile.is_edible():
+        points = tile.get_points()
         print('eat', points)
-        CURRENT_PLAYER_TILE.clear_wall()
+        tile.clear_wall()
         # now reload the background there
-        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(CURRENT_PLAYER_TILE_POSITION[0], CURRENT_PLAYER_TILE_POSITION[1])
+        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(
+            CURRENT_PLAYER_TILE_POSITION[0], 
+            CURRENT_PLAYER_TILE_POSITION[1]
+            )
 
 
 # This is pretty small. might go better with check wall collision but for now it's
