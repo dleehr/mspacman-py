@@ -156,6 +156,9 @@ def check_player_eat_dot():
         points = CURRENT_PLAYER_TILE.get_points()
         print('eat', points)
         CURRENT_PLAYER_TILE.clear_wall()
+        # now reload the background there
+        load_level_background()
+
 
 # This is pretty small. might go better with check wall collision but for now it's
 # separate function
