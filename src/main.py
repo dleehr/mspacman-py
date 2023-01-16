@@ -30,6 +30,8 @@ class Move:
 
 # this position is in game board pixel coordinates, and the top left of the peg
 CURRENT_PLAYER_POSITION = (100, 128)
+CURRENT_PLAYER_TILE = (0, 0) # for eating dots, and maybe detecting collisions?
+
 CURRENT_PLAYER_DIRECTION = Move.STOP
 DESIRED_PLAYER_DIRECTION = Move.STOP
 
@@ -85,14 +87,14 @@ def read_inputs():
 # and check wokkable again
 
 
-def check_wokkable(position, direction):
+def get_tile(position, direction):
     # If moving up or down, can't move if not aligned on an X tile
     if direction[1] != 0 and position[0] % 8 != 0:
-        return
+        return None
 
     # If moving left or right, can't move if not aligned on a Y tile
     if direction[0] != 0 and position[1] % 8 != 0:
-        return
+        return None
 
     # First, add 8. Let's explore the initial position (100, 128) for why
     # That's the top left corner of the peg. Looking at the Y-coordinate, 128 is the
@@ -124,19 +126,39 @@ def check_wokkable(position, direction):
         target_tile[1]
         )
 
-    return tile.is_wokkable()
+    return tile
 
 
+# This checks the desired direction and current direction against
+# the map to see if they can move where they're trying to
+# It updates CURRENT_PLAYER_DIRECTION and CURRENT_PLAYER_TILE if
+# the target tile is wokkable
 def check_player_wall_collision():
     global CURRENT_PLAYER_DIRECTION
-    if check_wokkable(CURRENT_PLAYER_POSITION, DESIRED_PLAYER_DIRECTION):
+    global CURRENT_PLAYER_TILE
+    tile = get_tile(CURRENT_PLAYER_POSITION, DESIRED_PLAYER_DIRECTION)
+    # return tile might be None
+    if tile and tile.is_wokkable():
         CURRENT_PLAYER_DIRECTION = DESIRED_PLAYER_DIRECTION
-    elif check_wokkable(CURRENT_PLAYER_POSITION, CURRENT_PLAYER_DIRECTION):
+        CURRENT_PLAYER_TILE = tile
+        return
+    tile = get_tile(CURRENT_PLAYER_POSITION, CURRENT_PLAYER_DIRECTION)
+    if tile and tile.is_wokkable():
         CURRENT_PLAYER_DIRECTION = CURRENT_PLAYER_DIRECTION
-    else:
-        CURRENT_PLAYER_DIRECTION = Move.STOP
+        CURRENT_PLAYER_TILE = tile
+        return
+    CURRENT_PLAYER_DIRECTION = Move.STOP
 
 
+def check_player_eat_dot():
+    # look at current tile
+    if CURRENT_PLAYER_TILE.is_edible():
+        points = CURRENT_PLAYER_TILE.get_points()
+        print('eat', points)
+        CURRENT_PLAYER_TILE.clear_wall()
+
+# This is pretty small. might go better with check wall collision but for now it's
+# separate function
 def update_player_position():
     global CURRENT_PLAYER_POSITION
     NEW_X = CURRENT_PLAYER_POSITION[0] + CURRENT_PLAYER_DIRECTION[0]
@@ -180,6 +202,10 @@ while True:
     read_inputs()
     # Check player wall collision
     check_player_wall_collision()
+    check_player_eat_dot()
+
+    # This just updates the draw location of the player.
+    # Collision and other stuff is done elsewhere
     update_player_position()
 
     # now draw

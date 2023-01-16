@@ -3,11 +3,16 @@ from map import pat
 from pathlib import Path
 import re
 
+DOT_POINTS = 10
+PP_POINTS = 50
 
 class Wall(object):
     def __init__(self, index, rows):
         self.index = index
         self.rows = rows
+
+
+CLEAR_WALL = Wall(0, ['0' * 8] * 8)
 
 
 class Tile(object):
@@ -32,6 +37,23 @@ class Tile(object):
     def is_wokkable(self):
         # Full-black, with dot, and with power pellet all true
         return self.wall.index in [0, 1, 2]
+
+    def is_edible(self):
+        return self.wall.index in [1, 2]
+
+    def get_points(self):
+        if self.wall.index == 1:
+            return DOT_POINTS
+        elif self.wall.index == 2:
+            return PP_POINTS
+        else:
+            return 0
+
+    # initially tried changing the index on the wall, but that changes ALL the
+    # tiles using the same wall. So instead we change the underlying wall to
+    # the CLEAR_WALL, which is index 0 and then 8x8 '0'
+    def clear_wall(self):
+        self.wall = CLEAR_WALL
 
 
 class Levels(object):
