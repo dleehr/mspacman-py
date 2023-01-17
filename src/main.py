@@ -14,6 +14,7 @@ CURRENT_PLAYER_SURFACE = None
 SCREEN_SIZE = (224, 288)
 COLOR_BLACK = (0, 0, 0)
 CLOCK_RATE = 60
+TICK_COUNTER = 0
 
 GAME_BOARD_POSITION = (0, 24)
 CURRENT_LEVEL = 0
@@ -198,6 +199,28 @@ def draw_player():
     SCREEN.blit(CURRENT_PLAYER_SURFACE, position)
 
 
+def tick():
+    global TICK_COUNTER
+    TICK_COUNTER += 1
+    CLOCK.tick(CLOCK_RATE)
+
+
+def animate_palette_changes():
+    if TICK_COUNTER % 10 == 0:
+        # change the palette color for the background to black or white
+        old = LEVELS.palettes_dict[CURRENT_LEVEL][5]
+        LEVELS.palettes_dict[CURRENT_LEVEL][5] = LEVELS.palettes_dict[CURRENT_LEVEL][6]
+        LEVELS.palettes_dict[CURRENT_LEVEL][6] = old
+
+        # Redraw the power-pellet tiles.
+        # Might rework the surface to use palettes instead of redrawing here.
+        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(1, 2)
+        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(26, 2)
+        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(1, 27)
+        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(26, 27)
+
+
+
 init_screen()
 load_data()
 # load the background for the current level
@@ -221,6 +244,7 @@ while True:
     update_player_position()
 
     # now draw
+    animate_palette_changes()
     draw_game_board()
     draw_player()
 
@@ -229,4 +253,4 @@ while True:
 
     # This draws - flip the buffer
     pygame.display.flip()
-    CLOCK.tick(CLOCK_RATE)
+    tick()
