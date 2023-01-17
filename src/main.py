@@ -54,7 +54,7 @@ def load_level_background():
     global CURRENT_BACKGROUND_SURFACE
     global BACKGROUNDS
     level_tile_list = LEVELS.tile_dict[CURRENT_LEVEL]
-    background = Background(level_tile_list, LEVELS.palettes_dict[CURRENT_LEVEL])
+    background = Background(level_tile_list, LEVELS.palettes[CURRENT_LEVEL])
     BACKGROUNDS[CURRENT_LEVEL] = background
     background.draw_full_surface()
     CURRENT_BACKGROUND_SURFACE = background.surface
@@ -207,18 +207,8 @@ def tick():
 
 def animate_palette_changes():
     if TICK_COUNTER % 10 == 0:
-        # change the palette color for the background to black or white
-        old = LEVELS.palettes_dict[CURRENT_LEVEL][5]
-        LEVELS.palettes_dict[CURRENT_LEVEL][5] = LEVELS.palettes_dict[CURRENT_LEVEL][6]
-        LEVELS.palettes_dict[CURRENT_LEVEL][6] = old
-
-        # Redraw the power-pellet tiles.
-        # Might rework the surface to use palettes instead of redrawing here.
-        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(1, 2)
-        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(26, 2)
-        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(1, 27)
-        BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(26, 27)
-
+        # Update the palette on the background
+        BACKGROUNDS[CURRENT_LEVEL].cycle_pellet_pallette()
 
 
 init_screen()
