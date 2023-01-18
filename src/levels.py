@@ -3,8 +3,8 @@ from map import pat
 from pathlib import Path
 import re
 
-DOT_POINTS = 10
-PP_POINTS = 50
+DOT_POINTS = 1 # shown as 10 but just storing 1
+PP_POINTS = 5 # shown as 50 but just storing 5 internally
 
 
 def load_palette(filename):

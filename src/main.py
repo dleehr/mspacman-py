@@ -190,15 +190,19 @@ def draw_score():
     y = SCORE_DRAW_POSITION[CURRENT_PLAYER][1] * 8
     x_base = SCORE_DRAW_POSITION[CURRENT_PLAYER][0] * 8
 
-    # Every score ends in 0, no need to look that up
-    # Could just scale the points down
+    # The score is always a multiple of 10, so we actually don't store the
+    # single digits and always draw a trailing 0. So a score shown as
+    # 1460 is internally 146. Deflation!
+
+    # Draw that trailing zero
     SCREEN.blit(SCORE_SURFACES[0], (x_base + 48, y))
 
+    # see, look. we didn't even get the score yet
     score = PLAYER_SCORES[CURRENT_PLAYER]
-    score = int(score / 10)
 
-    # zero score should be drawn as 00. The second 0 is already drawn,
-    # so just draw the first and be done
+    # A zero score should be drawn as 00. The second 0 is already drawn,
+    # so just draw the first and be done. Probably not how the cabinet does it
+    # but we can do it this way.
     if score == 0:
         # if zero, should draw 00 and be done
         SCREEN.blit(SCORE_SURFACES[0], (x_base + 40, y))
