@@ -2,6 +2,7 @@ import pygame
 import sys
 from levels import load_levels
 from background import Background
+from score import load_score_surfaces, load_score_tiles
 from player import PLAYER_SIZE, load_player, player_to_surface
 
 SCREEN = None
@@ -10,6 +11,7 @@ LEVELS = None
 
 CURRENT_BACKGROUND_SURFACE = None
 CURRENT_PLAYER_SURFACE = None
+SCORE_SURFACES = None
 
 SCREEN_SIZE = (224, 288)
 COLOR_BLACK = (0, 0, 0)
@@ -17,6 +19,10 @@ CLOCK_RATE = 60
 TICK_COUNTER = 0
 
 GAME_BOARD_POSITION = (0, 24)
+SCORE_DRAW_POSITION = [
+  (0, 1),               # ends at 6, 1, e.g. .....00. Could just always draw the final 0 every time
+  None                  # TODO: Where to put 2UP score
+]
 CURRENT_LEVEL = 0
 BACKGROUNDS = {}
 
@@ -34,6 +40,7 @@ CURRENT_PLAYER_POSITION = (100, 128)
 CURRENT_PLAYER_TILE_POSITION = None # Keep the 28x36 coordinate of the tile the player is on or moving to for collision detection
 CURRENT_PLAYER_DIRECTION = Move.STOP
 DESIRED_PLAYER_DIRECTION = Move.STOP
+
 
 # Game state - globals
 CURRENT_PLAYER = 0
@@ -53,7 +60,10 @@ def init_screen():
 
 def load_data():
     global LEVELS
+    global SCORE_SURFACES
     LEVELS = load_levels()
+    score_tiles = load_score_tiles()
+    SCORE_SURFACES = load_score_surfaces(score_tiles)
 
 
 def load_level_background():
@@ -177,8 +187,29 @@ def check_player_eat_dot():
 
 
 def draw_score():
-  	# TODO: draw this
-    print(PLAYER_SCORES[CURRENT_PLAYER])
+    y = SCORE_DRAW_POSITION[CURRENT_PLAYER][1] * 8
+    x_base = SCORE_DRAW_POSITION[CURRENT_PLAYER][0] * 8
+    score = PLAYER_SCORES[CURRENT_PLAYER]
+    # make room for 6 digits
+    offset = 6
+    while score > 0:
+        # divide and modulo the score by 10 repeatedly to get each digit
+        digit = score % 10
+        score = int(score / 10)
+        # Since the digit is an int, we can get the surface_digit by indexing into the list
+        surface_digit = SCORE_SURFACES[digit]
+        # Where to draw it? draw it at our offset position times the width
+        x = x_base + (offset * 8)
+        SCREEN.blit(surface_digit, (x, y))
+        # now move the position to the left
+        offset -= 1
+    while offset > 0:
+        # After drawing all the digits, draw black squares over the rest.
+        # Might not be necessary until the score goes back to zero
+        surface_digit = SCORE_SURFACES[10]
+        x = x_base + (offset * 8)
+        SCREEN.blit(surface_digit, (x, y))
+        offset -= 1
 
 
 # This is pretty small. might go better with check wall collision but for now it's
