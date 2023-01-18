@@ -203,13 +203,6 @@ def draw_score():
         SCREEN.blit(surface_digit, (x, y))
         # now move the position to the left
         offset -= 1
-    while offset > 0:
-        # After drawing all the digits, draw black squares over the rest.
-        # Might not be necessary until the score goes back to zero
-        surface_digit = SCORE_SURFACES[10]
-        x = x_base + (offset * 8)
-        SCREEN.blit(surface_digit, (x, y))
-        offset -= 1
 
 
 # This is pretty small. might go better with check wall collision but for now it's
