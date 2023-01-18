@@ -13,3 +13,11 @@ I greatly improved the wall detection. One thing I'm not even sure is necessary 
  But now what I'm thinking about is how to animate the 4 blinking dots. I could either replace the tile with a different one with the same score, or I could cycle the palette color for that. I bet that back in the day they cycled the palette color.
 
  Another thought - storing score characters. I didn't do these in the SNES version yet. But they'll definitely be loaded as tile maps. Maybe this just goes as more stuff in `walls.chr`.
+
+## 2023-01-17
+
+Curious if there was any info on how the ghosts move, and yes -- yes there is. A couple interesting things break my assumptions, via [The Pac-Man Dossier](https://pacman.holenet.info).
+
+1. Movement around corners doesn't work the way I thought. Rounding a corner will actually cut a few diagonal pixels if you change direction early: [Chapter 2: Cornering](https://pacman.holenet.info/#CH2_Cornering).
+2. Tapping the direction way in advance isn't enough to change it. Looks like it only starts to register maybe as you approach the tile. Maybe it's up to 4 pixels away - so half a tile - tested in MAME.
+3. Speed varies and pac-man slows down when eating a dot: [Chapter 2: Speed](https://pacman.holenet.info/#CH2_Speed). I thought the dots slowed you down but haven't implemented that. Need to check these against MAME, not sure it's the same on Ms. Pac-Man as described for Pac-Man.
