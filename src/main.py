@@ -35,6 +35,12 @@ CURRENT_PLAYER_TILE_POSITION = None # Keep the 28x36 coordinate of the tile the 
 CURRENT_PLAYER_DIRECTION = Move.STOP
 DESIRED_PLAYER_DIRECTION = Move.STOP
 
+# Game state - globals
+CURRENT_PLAYER = 0
+PLAYER_SCORES = [0,0]
+HIGH_SCORE = 0
+
+
 pygame.init()
 
 
@@ -161,13 +167,18 @@ def check_player_eat_dot():
     tile = get_current_background_tile(CURRENT_PLAYER_TILE_POSITION[0], CURRENT_PLAYER_TILE_POSITION[1])
     if tile.is_edible():
         points = tile.get_points()
-        print('eat', points)
+        PLAYER_SCORES[CURRENT_PLAYER] += points
         tile.clear_wall()
         # now reload the background there
         BACKGROUNDS[CURRENT_LEVEL].draw_tile_on_surface(
             CURRENT_PLAYER_TILE_POSITION[0],
             CURRENT_PLAYER_TILE_POSITION[1]
             )
+
+
+def draw_score():
+  	# TODO: draw this
+    print(PLAYER_SCORES[CURRENT_PLAYER])
 
 
 # This is pretty small. might go better with check wall collision but for now it's
@@ -236,6 +247,7 @@ while True:
     # now draw
     animate_palette_changes()
     draw_game_board()
+    draw_score()
     draw_player()
 
     # where is she?
