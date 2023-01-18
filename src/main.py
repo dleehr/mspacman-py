@@ -189,20 +189,34 @@ def check_player_eat_dot():
 def draw_score():
     y = SCORE_DRAW_POSITION[CURRENT_PLAYER][1] * 8
     x_base = SCORE_DRAW_POSITION[CURRENT_PLAYER][0] * 8
+
+    # Every score ends in 0, no need to look that up
+    # Could just scale the points down
+    SCREEN.blit(SCORE_SURFACES[0], (x_base + 48, y))
+
     score = PLAYER_SCORES[CURRENT_PLAYER]
-    # make room for 6 digits
-    offset = 6
-    while score > 0:
-        # divide and modulo the score by 10 repeatedly to get each digit
-        digit = score % 10
-        score = int(score / 10)
-        # Since the digit is an int, we can get the surface_digit by indexing into the list
-        surface_digit = SCORE_SURFACES[digit]
-        # Where to draw it? draw it at our offset position times the width
-        x = x_base + (offset * 8)
-        SCREEN.blit(surface_digit, (x, y))
-        # now move the position to the left
-        offset -= 1
+    score = int(score / 10)
+
+    # zero score should be drawn as 00. The second 0 is already drawn,
+    # so just draw the first and be done
+    if score == 0:
+        # if zero, should draw 00 and be done
+        SCREEN.blit(SCORE_SURFACES[0], (x_base + 40, y))
+        return
+    else:
+        # make room for 5 other digits
+        offset = 5
+        while score > 0:
+            # divide and modulo the score by 10 repeatedly to get each digit
+            digit = score % 10
+            score = int(score / 10)
+            # Since the digit is an int, we can get the surface_digit by indexing into the list
+            surface_digit = SCORE_SURFACES[digit]
+            # Where to draw it? draw it at our offset position times the width
+            x = x_base + (offset * 8)
+            SCREEN.blit(surface_digit, (x, y))
+            # now move the position to the left
+            offset -= 1
 
 
 # This is pretty small. might go better with check wall collision but for now it's
