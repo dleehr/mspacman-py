@@ -52,7 +52,8 @@ def load_player():
     rows = load(player_file)
     rows = [r for r in rows if r]
     blocks = [x for x in chunk8(rows)]
-    blocks = [blocks[2], blocks[3], blocks[18], blocks[19]]
+    print(len(blocks))
+    blocks = [blocks[4], blocks[5], blocks[20], blocks[21]]
     palette = load_palette(palette_file)
     p = Player(blocks, palette)
     return p
@@ -72,4 +73,4 @@ def player_to_surface(player, size):
 if __name__ == '__main__':
     p = load_player()
     p.print_all()
-    print(player_to_surface(p, PLAYER_SIZE))
+#     print(player_to_surface(p, PLAYER_SIZE))
