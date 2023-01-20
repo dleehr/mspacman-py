@@ -52,7 +52,7 @@ def load_player():
     rows = load(player_file)
     rows = [r for r in rows if r]
     blocks = [x for x in chunk8(rows)]
-    blocks = [blocks[0], blocks[1], blocks[16], blocks[17]]
+    blocks = [blocks[2], blocks[3], blocks[18], blocks[19]]
     palette = load_palette(palette_file)
     p = Player(blocks, palette)
     return p
