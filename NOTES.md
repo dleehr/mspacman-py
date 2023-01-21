@@ -26,5 +26,5 @@ Now the score drawing is working. I have the surfaces in a list so each digit in
 
 ## 2023-01-19
 
-Animations. Looked like only top right and bottom right tiles actually change but that's not true. The back of the face does change a tiny bit - not much but it's yellow. Transcribed the fully-open sprite, next need to do the fully closed and cycle the animation when moving. Then comes flipping and vertical.
+Animations. Looked like only top right and bottom right tiles actually change but that's not true. The back of the face does change a tiny bit - not much but it's yellow. Transcribed the fully-open sprite, next need to do the fully closed and cycle the animation when moving. Did that, next comes flipping and vertical.
 
