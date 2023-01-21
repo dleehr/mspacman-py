@@ -43,7 +43,7 @@ class Player():
             print()
 
 
-def load_player():
+def load_players():
     player_file = Path(__file__).parent.parent / 'mspacman-snes' / 'mspacman.chr'
     palette_file = Path(__file__).parent.parent / 'mspacman-snes' / 'mspacman.pxt'
     # Each line in the file has 8 characters
@@ -52,10 +52,15 @@ def load_player():
     rows = load(player_file)
     rows = [r for r in rows if r]
     blocks = [x for x in chunk8(rows)]
-    blocks = [blocks[0], blocks[1], blocks[16], blocks[17]]
     palette = load_palette(palette_file)
-    p = Player(blocks, palette)
-    return p
+    # load 3 players
+    players = list()
+    for x in range(0, 6, 2):
+      # 0,1   2,3    4,5
+      # 16,17 18,19  20,21
+      player_blocks = [blocks[x], blocks[x+1], blocks[x+16], blocks[x+17]]
+      players.append(Player(player_blocks, palette))
+    return players
 
 
 def player_to_surface(player, size):
@@ -70,6 +75,7 @@ def player_to_surface(player, size):
 
 
 if __name__ == '__main__':
-    p = load_player()
-    p.print_all()
-    print(player_to_surface(p, PLAYER_SIZE))
+    players = load_players()
+    for p in players:
+      p.print_all()
+#     print(player_to_surface(p, PLAYER_SIZE))

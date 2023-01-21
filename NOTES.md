@@ -23,3 +23,8 @@ Curious if there was any info on how the ghosts move, and yes -- yes there is. A
 3. Speed varies and pac-man slows down when eating a dot: [Chapter 2: Speed](https://pacman.holenet.info/#CH2_Speed). I thought the dots slowed you down but haven't implemented that. Need to check these against MAME, not sure it's the same on Ms. Pac-Man as described for Pac-Man.
 
 Now the score drawing is working. I have the surfaces in a list so each digit indexes its glyph. Then in python, I modulo 10, divide by 10, and repeat until 0. Can't really do that on SNES since I can't divide easily. But it looks like storing the scores can be done differently - either by manually handling the carry at 10 (see https://taywee.github.io/NerdyNights/nerdynights/numbers.html) or using BCD modes.
+
+## 2023-01-19
+
+Animations. Looked like only top right and bottom right tiles actually change but that's not true. The back of the face does change a tiny bit - not much but it's yellow. Transcribed the fully-open sprite, next need to do the fully closed and cycle the animation when moving. Did that, next comes flipping and vertical.
+

@@ -3,14 +3,14 @@ import sys
 from levels import load_levels
 from background import Background
 from score import load_score_surfaces, load_score_tiles
-from player import PLAYER_SIZE, load_player, player_to_surface
+from player import PLAYER_SIZE, load_players, player_to_surface
 
 SCREEN = None
 CLOCK = None
 LEVELS = None
 
 CURRENT_BACKGROUND_SURFACE = None
-CURRENT_PLAYER_SURFACE = None
+CURRENT_PLAYER_SURFACES = None
 SCORE_SURFACES = None
 
 SCREEN_SIZE = (224, 288)
@@ -40,6 +40,8 @@ CURRENT_PLAYER_POSITION = (100, 128)
 CURRENT_PLAYER_TILE_POSITION = None # Keep the 28x36 coordinate of the tile the player is on or moving to for collision detection
 CURRENT_PLAYER_DIRECTION = Move.STOP
 DESIRED_PLAYER_DIRECTION = Move.STOP
+CURRENT_PLAYER_ANIMATION_FRAME_INDEX = 0
+PLAYER_ANIMATION_FRAMES = [0, 2, 2, 0, 0, 1, 1, 0, 0]
 
 
 # Game state - globals
@@ -76,10 +78,9 @@ def load_level_background():
     CURRENT_BACKGROUND_SURFACE = background.surface
 
 
-def load_player_surface():
-    global CURRENT_PLAYER_SURFACE
-    player = load_player()
-    CURRENT_PLAYER_SURFACE = player_to_surface(player, PLAYER_SIZE)
+def load_player_surfaces():
+    global CURRENT_PLAYER_SURFACES
+    CURRENT_PLAYER_SURFACES = [player_to_surface(p, PLAYER_SIZE) for p in load_players()]
 
 
 # sets a new DESIRED_PLAYER_DIRECTION
@@ -249,13 +250,21 @@ def draw_player():
         CURRENT_PLAYER_POSITION[0] + GAME_BOARD_POSITION[0] + 4,
         CURRENT_PLAYER_POSITION[1] + GAME_BOARD_POSITION[1] + 4,
         )
-    SCREEN.blit(CURRENT_PLAYER_SURFACE, position)
+    FRAME = PLAYER_ANIMATION_FRAMES[CURRENT_PLAYER_ANIMATION_FRAME_INDEX]
+    SCREEN.blit(CURRENT_PLAYER_SURFACES[FRAME], position)
 
 
 def tick():
     global TICK_COUNTER
     TICK_COUNTER += 1
     CLOCK.tick(CLOCK_RATE)
+
+
+def animate_player_changes():
+    global CURRENT_PLAYER_ANIMATION_FRAME_INDEX
+    if CURRENT_PLAYER_DIRECTION != Move.STOP:
+      CURRENT_PLAYER_ANIMATION_FRAME_INDEX += 1
+      CURRENT_PLAYER_ANIMATION_FRAME_INDEX %= len(PLAYER_ANIMATION_FRAMES)
 
 
 def animate_palette_changes():
@@ -268,7 +277,7 @@ init_screen()
 load_data()
 # load the background for the current level
 load_level_background()
-load_player_surface()
+load_player_surfaces()
 
 # game loop
 while True:
@@ -288,6 +297,7 @@ while True:
 
     # now draw
     animate_palette_changes()
+    animate_player_changes()
     draw_game_board()
     draw_score()
     draw_player()
