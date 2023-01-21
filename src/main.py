@@ -10,7 +10,8 @@ CLOCK = None
 LEVELS = None
 
 CURRENT_BACKGROUND_SURFACE = None
-CURRENT_PLAYER_SURFACES = None
+PLAYER_SURFACES_DIRECTION_MAP = None # all the surfaces
+CURRENT_PLAYER_SURFACES = None # Animation frames for current direction
 SCORE_SURFACES = None
 
 SCREEN_SIZE = (224, 288)
@@ -79,8 +80,20 @@ def load_level_background():
 
 
 def load_player_surfaces():
+    global PLAYER_SURFACES_DIRECTION_MAP
     global CURRENT_PLAYER_SURFACES
-    CURRENT_PLAYER_SURFACES = [player_to_surface(p, PLAYER_SIZE) for p in load_players()]
+    # load up the different directional ones
+    surfaces_right = [player_to_surface(p, PLAYER_SIZE) for p in load_players()]
+    surfaces_left = [pygame.transform.flip(s, True, False) for s in surfaces_right]
+    surfaces_up = [pygame.transform.rotate(s, 90) for s in surfaces_right]
+    surfaces_down = [pygame.transform.rotate(s, 270) for s in surfaces_right]
+    PLAYER_SURFACES_DIRECTION_MAP = {
+      Move.LEFT: surfaces_left,
+      Move.RIGHT: surfaces_right,
+      Move.UP: surfaces_up,
+      Move.DOWN: surfaces_down
+    }
+    CURRENT_PLAYER_SURFACES = PLAYER_SURFACES_DIRECTION_MAP[Move.RIGHT]
 
 
 # sets a new DESIRED_PLAYER_DIRECTION
@@ -232,6 +245,10 @@ def update_player_position():
     NEW_Y = CURRENT_PLAYER_POSITION[1] + CURRENT_PLAYER_DIRECTION[1]
     CURRENT_PLAYER_POSITION = (NEW_X, NEW_Y)
 
+def update_player_surfaces():
+    global CURRENT_PLAYER_SURFACES
+    if CURRENT_PLAYER_DIRECTION != Move.STOP:
+        CURRENT_PLAYER_SURFACES = PLAYER_SURFACES_DIRECTION_MAP[CURRENT_PLAYER_DIRECTION]
 
 def draw_game_board():
     SCREEN.blit(CURRENT_BACKGROUND_SURFACE, GAME_BOARD_POSITION)
@@ -294,6 +311,7 @@ while True:
     # This just updates the draw location of the player.
     # Collision and other stuff is done elsewhere
     update_player_position()
+    update_player_surfaces()
 
     # now draw
     animate_palette_changes()

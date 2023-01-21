@@ -28,3 +28,6 @@ Now the score drawing is working. I have the surfaces in a list so each digit in
 
 Animations. Looked like only top right and bottom right tiles actually change but that's not true. The back of the face does change a tiny bit - not much but it's yellow. Transcribed the fully-open sprite, next need to do the fully closed and cycle the animation when moving. Did that, next comes flipping and vertical.
 
+## 2023-01-20
+
+After animating by creating a list of surfaces and a list of indices, I implemented the different directions. Here in pygame I'm just using `pygame.surface.transform` to create 4 copies of the player sprite. I store them in a dictionary and look them up by the direction vector. On SNES I won't be able to rotate the sprite so I'll just need to store it twice. I can store a Right-facing and flip X to get the Left-facing. I can store an Up-facing and flip X and Y to get the Down-facing. I can rotate them in my python code when I build. For ghosts, it's just the eyes that move, so that might be 3 or 4 different sprites.
